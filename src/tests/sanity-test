@@ -1,7 +1,16 @@
 #! /bin/sh
 
-./configure && make -C src clean && make -C src && \
-  (cd src/ruby-binding; ruby extconf.rb) && \
-  make -C src/ruby-binding/ && \
-  (cd src/tests; ruby extconf.rb) && \
-  make -C src/tests/ && ./src/tests/lmc 
+# -v: verbose, print command line.
+set -v
+
+./configure || exit 1
+
+make -C src clean || exit 1
+make -C src || exit 1
+
+(cd src/ruby-binding; ruby extconf.rb) || exit 1
+make -C src/ruby-binding/ || exit 1
+
+(cd src/tests; ruby extconf.rb) || exit 1
+make -C src/tests/ || exit 1
+./src/tests/lmc || exit 1
