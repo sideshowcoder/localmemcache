@@ -18,4 +18,8 @@ Makefile
 *.log
 pkg
 .vagrant
-
+TAGS
+tags
+GPATH
+GRTAGS
+GTAGS
