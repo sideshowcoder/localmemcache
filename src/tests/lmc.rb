@@ -45,7 +45,7 @@ describe 'LocalMemCache' do
     $lm.keys().size.should.equal 2
   end
 
-  it 'should support each_pair' do 
+  it 'should support each_pair' do
     $lm.each_pair {|k, v| }
   end
 
@@ -65,7 +65,7 @@ describe 'LocalMemCache' do
     $lm.check_consistency.should.be.true
   end
 
-  it 'should support iteration' do 
+  it 'should support iteration' do
     s = $lm.size
     s.should.equal 3
     c = 0
@@ -112,7 +112,7 @@ describe 'LocalMemCache' do
     ll.size.should.equal 0
   end
 
-  it 'should support checking of namespaces' do 
+  it 'should support checking of namespaces' do
     LocalMemCache.check :namespace => "test"
   end
 
@@ -125,15 +125,74 @@ describe 'LocalMemCache' do
     lm = LocalMemCache.new :filename => "/tmp/.tmp.a.lmc", :size_mb => 1
     lm[:boo] = 1
     lm.size.should.equal 1
-    File.exists?(".tmp.a.lmc").should.be.true
+    File.exists?("/tmp/.tmp.a.lmc").should.be.true
     LocalMemCache.check :filename => "/tmp/.tmp.a.lmc"
     LocalMemCache.drop :filename => "/tmp/.tmp.a.lmc"
   end
 
 end
 
+describe "LocalMemCache:increment" do
+  before do
+    LocalMemCache.drop :namespace => "increment_test", :force => true
+    @lm = LocalMemCache.new :namespace=>"incremen_test", :size_mb => 1
+  end
+
+  it 'initializes in #increment with 1' do
+    @lm.has_key?('inckey').should.be.false
+    @lm.increment('inckey').should.equal 1
+    @lm.has_key?('inckey').should.be.true
+    @lm['inckey'].should.equal 1
+  end
+
+  it 'initializes in #increment with 42' do
+    @lm.has_key?('inckey').should.be.false
+    @lm.increment('inckey', 42).should.equal 42
+    @lm.has_key?('inckey').should.be.true
+    @lm['inckey'].should.equal 42
+  end
+
+  it 'initializes decrement with 0' do
+    @lm.has_key?('deckey').should.be.false
+    @lm.decrement('deckey', 0).should.equal 0
+    @lm.has_key?('deckey').should.be.true
+    @lm['deckey'].should.equal 0
+  end
+
+  it 'supports incrementing existing value by value' do
+    @lm.increment('inckey').should.equal 1
+    @lm.increment('inckey').should.equal 2
+    @lm.increment('inckey', 42).should.equal 44
+    @lm['inckey'].should.equal 44
+  end
+
+  it 'supports decrementing existing value by value' do
+    @lm.increment('inckey').should.equal 1
+    @lm.decrement('inckey').should.equal 0
+    @lm.increment('inckey', 42).should.equal 42
+    @lm.decrement('inckey', 2).should.equal 40
+    @lm['inckey'].should.equal 40
+  end
+
+  it 'supports incrementing existing value by 0' do
+    @lm.increment('inckey').should.equal 1
+    @lm.increment('inckey', 0).should.equal 1
+    @lm['inckey'].should.equal 1
+  end
+
+  it 'raises error in #increment on non integer value' do
+    @lm['strkey'] = 'value'
+    lambda { @lm.increment('strkey') }.should.raise(LocalMemCache::NonNumericTypeError)
+  end
+
+  it 'raises error in #decrement on non integer value' do
+    @lm['strkey'] = 'value'
+    lambda { @lm.decrement('strkey') }.should.raise(LocalMemCache::NonNumericTypeError)
+  end
+end
+
 LocalMemCache.drop :namespace => "test-shared-os", :force => true
-$lmsh = LocalMemCache::SharedObjectStorage.new :namespace=>"test-shared-os", 
+$lmsh = LocalMemCache::SharedObjectStorage.new :namespace=>"test-shared-os",
     :size_mb => 2
 
 describe 'LocalMemCache::SharedObjectStorage' do

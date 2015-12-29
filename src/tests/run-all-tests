@@ -1,6 +1,5 @@
 #! /bin/sh
 
-
 echo "SHM"
 ./shm
 echo "LMC"

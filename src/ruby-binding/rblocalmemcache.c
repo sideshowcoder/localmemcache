@@ -41,7 +41,7 @@ typedef struct {
 } lmc_rb_str_d_t;
 
 /* :nodoc: */
-void rstring_acquire(VALUE s, lmc_rb_str_d_t *d) { 
+void rstring_acquire(VALUE s, lmc_rb_str_d_t *d) {
   if (NIL_P(s)) {
     d->cstr = "nil";
     d->len = 0;
@@ -53,20 +53,20 @@ void rstring_acquire(VALUE s, lmc_rb_str_d_t *d) {
 }
 
 /* :nodoc: */
-char *rstring_ptr(VALUE s) { 
-  char* r = NIL_P(s) ? "nil" : RSTRING_PTR(rb_String(s)); 
+char *rstring_ptr(VALUE s) {
+  char* r = NIL_P(s) ? "nil" : RSTRING_PTR(rb_String(s));
   return r ? r : "nil";
 }
 
 /* :nodoc: */
-char *rstring_ptr_null(VALUE s) { 
-  char* r = NIL_P(s) ? NULL : RSTRING_PTR(rb_String(s)); 
+char *rstring_ptr_null(VALUE s) {
+  char* r = NIL_P(s) ? NULL : RSTRING_PTR(rb_String(s));
   return r ? r : NULL;
 }
 
 /* :nodoc: */
-size_t rstring_length(VALUE s) { 
-  size_t r = NIL_P(s) ? 0 : RSTRING_LEN(rb_String(s)); 
+size_t rstring_length(VALUE s) {
+  size_t r = NIL_P(s) ? 0 : RSTRING_LEN(rb_String(s));
   return r;
 }
 /* :nodoc: */
@@ -75,12 +75,12 @@ static VALUE ruby_string(const char *s) { return s ? rb_str_new2(s) : Qnil; }
 int bool_value(VALUE v) { return v == Qtrue; }
 
 /* :nodoc: */
-static VALUE lmc_ruby_string2(const char *s, size_t l) { 
-  return s ? rb_str_new(s, l) : Qnil; 
+static VALUE lmc_ruby_string2(const char *s, size_t l) {
+  return s ? rb_str_new(s, l) : Qnil;
 }
 
 /* :nodoc: */
-static VALUE lmc_ruby_string(const char *s) { 
+static VALUE lmc_ruby_string(const char *s) {
   return lmc_ruby_string2(s + sizeof(size_t), *(size_t *) s);
 }
 
@@ -136,7 +136,7 @@ static VALUE LocalMemCache__new2(VALUE klass, VALUE o) {
   lmc_error_t e;
   local_memcache_t *l = local_memcache_create(
       rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_namespace)),
-      rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_filename)), 
+      rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_filename)),
       double_value(rb_hash_aref(o, lmc_rb_sym_size_mb)),
       long_value(rb_hash_aref(o, lmc_rb_sym_min_alloc_size)), &e);
   if (!l)  rb_lmc_raise_exception(&e);
@@ -169,10 +169,10 @@ local_memcache_t *get_LocalMemCache(VALUE obj) {
  * know when a handle is not valid anymore, so only delete a memory pool if
  * you are sure that all handles are closed.
  *
- * valid options for drop are 
- * [:namespace] 
- * [:filename] 
- * [:force] 
+ * valid options for drop are
+ * [:namespace]
+ * [:filename]
+ * [:force]
  *
  * The memory pool must be specified by either setting the :filename or
  * :namespace option.  The default for :force is false.
@@ -181,10 +181,10 @@ static VALUE LocalMemCache__drop(VALUE klass, VALUE o) {
   lmc_check_dict(o);
   lmc_error_t e;
   if (!local_memcache_drop_namespace(
-      rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_namespace)), 
+      rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_namespace)),
       rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_filename)),
       bool_value(rb_hash_aref(o, lmc_rb_sym_force)), &e)) {
-    rb_lmc_raise_exception(&e); 
+    rb_lmc_raise_exception(&e);
   }
   return Qnil;
 }
@@ -195,21 +195,21 @@ static VALUE LocalMemCache__drop(VALUE klass, VALUE o) {
  * Tries to repair a corrupt namespace.  Usually one doesn't call this method
  * directly, it's invoked automatically when operations time out.
  *
- * valid options are 
- * [:namespace] 
- * [:filename] 
+ * valid options are
+ * [:namespace]
+ * [:filename]
  *
  * The memory pool must be specified by either setting the :filename or
- * :namespace option. 
+ * :namespace option.
  */
 static VALUE LocalMemCache__check(VALUE klass, VALUE o) {
   lmc_check_dict(o);
   lmc_error_t e;
   if (!local_memcache_check_namespace(
-      rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_namespace)), 
+      rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_namespace)),
       rstring_ptr_null(rb_hash_aref(o, lmc_rb_sym_filename)),
       &e)) {
-    rb_lmc_raise_exception(&e); 
+    rb_lmc_raise_exception(&e);
   }
   return Qnil;
 }
@@ -227,7 +227,7 @@ static VALUE LocalMemCache__disable_test_crash(VALUE klass) {
   return Qnil;
 }
 
-/* 
+/*
  *  call-seq:
  *     lmc.get(key)   ->   string value or nil
  *     lmc[key]       ->   string value or nil
@@ -238,14 +238,14 @@ static VALUE LocalMemCache__get(VALUE obj, VALUE key) {
   size_t l;
   lmc_rb_str_d_t k;
   rstring_acquire(key, &k);
-  const char* r = __local_memcache_get(get_LocalMemCache(obj), 
+  const char* r = __local_memcache_get(get_LocalMemCache(obj),
       k.cstr, k.len, &l);
   VALUE rr = lmc_ruby_string2(r, l);
   lmc_unlock_shm_region("local_memcache_get", get_LocalMemCache(obj));
   return rr;
 }
 
-/* 
+/*
  *  call-seq:
  *     lmc.random_pair()   ->  [key, value] or nil
  *
@@ -255,18 +255,18 @@ static VALUE LocalMemCache__random_pair(VALUE obj) {
   char *k, *v;
   size_t n_k, n_v;
   VALUE r = Qnil;
-  if (__local_memcache_random_pair(get_LocalMemCache(obj), &k, &n_k, &v, 
+  if (__local_memcache_random_pair(get_LocalMemCache(obj), &k, &n_k, &v,
       &n_v)) {
     r = rb_ary_new();
     rb_ary_push(r, lmc_ruby_string2(k, n_k));
     rb_ary_push(r, lmc_ruby_string2(v, n_v));
   }
-  lmc_unlock_shm_region("local_memcache_random_pair", 
+  lmc_unlock_shm_region("local_memcache_random_pair",
       get_LocalMemCache(obj));
   return r;
 }
 
-/* 
+/*
  *  call-seq:
  *     lmc.set(key, value)   ->   Qnil
  *     lmc[key]=value        ->   Qnil
@@ -279,26 +279,55 @@ static VALUE LocalMemCache__set(VALUE obj, VALUE key, VALUE value) {
   lmc_rb_str_d_t k, v;
   rstring_acquire(key, &k);
   rstring_acquire(value, &v);
-  if (!local_memcache_set(lmc, k.cstr, k.len, v.cstr, v.len)) { 
-    rb_lmc_raise_exception(&lmc->error); 
+  if (!local_memcache_set(lmc, k.cstr, k.len, v.cstr, v.len)) {
+    rb_lmc_raise_exception(&lmc->error);
   }
   return Qnil;
 }
 
+/*
+ * call-seq:
+ *    lmc.increment(key, amount) -> number
+ *
+ *  Increment the value for key by amount, if key is not initialized, set to amount.
+ */
+static VALUE LocalMemCache__increment(VALUE key, VALUE amount) {
+  // TODO lock the memory to make sure this is atomic
+  // TODO check the type to be a number before executing
+  // TODO increment the value for the key by amount
+  // TODO if no value is present set to amount
+  // TODO unlock
+  return INT2NUM(1);
+}
 
 /*
- *  call-seq: 
+ * call-seq:
+ *    lmc.decrement(key, amount) -> number
+ *
+ *  Decrement the value for key by amount, if key is not initialized, set to amount.
+ */
+static VALUE LocalMemCache__decrement(VALUE key, VALUE amount) {
+  // TODO lock the memory to make sure this is atomic
+  // TODO check the type to be a number before executing
+  // TODO decrement the value for the key by amount
+  // TODO if no value is present set to amount
+  // TODO unlock
+  return INT2NUM(1);
+}
+
+/*
+ *  call-seq:
  *     lmc.clear -> Qnil
  *
  *  Clears content of hashtable.
  */
 static VALUE LocalMemCache__clear(VALUE obj) {
   local_memcache_t *lmc = get_LocalMemCache(obj);
-  if (!local_memcache_clear(lmc)) rb_lmc_raise_exception(&lmc->error); 
+  if (!local_memcache_clear(lmc)) rb_lmc_raise_exception(&lmc->error);
   return Qnil;
 }
 
-/* 
+/*
  *  call-seq:
  *     lmc.delete(key)   ->   Qnil
  *
@@ -311,7 +340,7 @@ static VALUE LocalMemCache__delete(VALUE obj, VALUE key) {
   return Qnil;
 }
 
-/* 
+/*
  *  call-seq:
  *     lmc.close()   ->   Qnil
  *
@@ -321,7 +350,7 @@ static VALUE LocalMemCache__close(VALUE obj) {
   lmc_error_t e;
   rb_lmc_handle_t *h;
   Data_Get_Struct(obj, rb_lmc_handle_t, h);
-  if (!local_memcache_free(rb_lmc_check_handle_access(h), &e)) 
+  if (!local_memcache_free(rb_lmc_check_handle_access(h), &e))
       rb_lmc_raise_exception(&e);
   h->open = 0;
   return Qnil;
@@ -348,14 +377,14 @@ static VALUE __LocalMemCache__keys(VALUE d) {
   ht_iter_status_t s;
   memset(&s, 0x0, sizeof(ht_iter_status_t));
   while (success == 2) {
-    success = local_memcache_iterate(get_LocalMemCache(obj), 
+    success = local_memcache_iterate(get_LocalMemCache(obj),
         (void *) &data, &s, lmc_ruby_iter);
   }
   if (!success) { return Qnil; }
   return Qnil;
 }
 
-/* 
+/*
  *  call-seq:
  *     lmc.keys()   ->   array or nil
  *
@@ -381,7 +410,7 @@ typedef struct {
 /* :nodoc: */
 int lmc_ruby_iter_collect_pairs(void *ctx, const char* key, const char* value) {
   lmc_ruby_iter_collect_pairs_t *data = ctx;
-  rb_ary_push(data->ary, rb_assoc_new(lmc_ruby_string(key), 
+  rb_ary_push(data->ary, rb_assoc_new(lmc_ruby_string(key),
       lmc_ruby_string(value)));
   return 1;
 }
@@ -396,7 +425,7 @@ static VALUE __LocalMemCache__each_pair(VALUE d) {
     VALUE r = rb_ary_new();
     lmc_ruby_iter_collect_pairs_t data;
     data.ary = r;
-    success = local_memcache_iterate(get_LocalMemCache(obj), 
+    success = local_memcache_iterate(get_LocalMemCache(obj),
         (void *) &data, &s, lmc_ruby_iter_collect_pairs);
     long i;
     for (i = 0; i < RARRAY_LEN(r); i++) {
@@ -407,7 +436,7 @@ static VALUE __LocalMemCache__each_pair(VALUE d) {
   return Qnil;
 }
 
-/* 
+/*
  *  call-seq:
  *     lmc.each_pair {|k, v|  block } -> nil
  *
@@ -425,7 +454,7 @@ static VALUE LocalMemCache__each_pair(VALUE obj) {
   return Qnil;
 }
 
-/* 
+/*
  *  call-seq:
  *     lmc.size -> number
  *
@@ -437,30 +466,30 @@ static VALUE LocalMemCache__size(VALUE obj) {
   return rb_int2big(ht->size);
 }
 
-/* 
+/*
  *  call-seq:
  *     lmc.shm_status -> hash
  *
  *  Some status information on the shared memory:
  *
- *    :total_bytes # the total size of the shm in bytes 
- *    :used_bytes  # how many bytes are used in this shm 
+ *    :total_bytes # the total size of the shm in bytes
+ *    :used_bytes  # how many bytes are used in this shm
  *                 # For exmpty namespaces this will reflect the amount
- *                 # of memory used for the hash buckets and some other 
+ *                 # of memory used for the hash buckets and some other
  *                 # administrative data structures.
- *    :free_bytes  # how many bytes are free 
+ *    :free_bytes  # how many bytes are free
  */
 static VALUE LocalMemCache__shm_status(VALUE obj) {
   VALUE hash = rb_hash_new();
-  
+
   local_memcache_t *lmc = get_LocalMemCache(obj);
   if (!lmc_lock_shm_region("shm_status", lmc)) return Qnil;
   lmc_mem_status_t ms = lmc_status(lmc->base, "shm_status");
   if (!lmc_unlock_shm_region("shm_status", lmc)) return Qnil;
 
-  rb_hash_aset(hash, ID2SYM(rb_intern("free_bytes")), 
+  rb_hash_aset(hash, ID2SYM(rb_intern("free_bytes")),
       rb_int2big(ms.total_free_mem));
-  rb_hash_aset(hash, ID2SYM(rb_intern("total_bytes")), 
+  rb_hash_aset(hash, ID2SYM(rb_intern("total_bytes")),
       rb_int2big(ms.total_shm_size));
   rb_hash_aset(hash, ID2SYM(rb_intern("used_bytes")), rb_int2big(
       ms.total_shm_size - ms.total_free_mem));
@@ -471,20 +500,20 @@ static VALUE LocalMemCache__shm_status(VALUE obj) {
   return hash;
 }
 
-/* 
+/*
  * internal, do not use
  */
 static VALUE LocalMemCache__check_consistency(VALUE obj) {
   lmc_error_t e;
   rb_lmc_handle_t *h;
   Data_Get_Struct(obj, rb_lmc_handle_t, h);
-  return local_memcache_check_consistency(rb_lmc_check_handle_access(h), &e) ? 
+  return local_memcache_check_consistency(rb_lmc_check_handle_access(h), &e) ?
       Qtrue : Qfalse;
 }
 
 /*
  * Document-class: LocalMemCache
- * 
+ *
  * <code>LocalMemCache</code> provides for a Hashtable of strings in shared
  * memory (via a memory mapped file), which thus can be shared between
  * processes on a computer.  Here is an example of its usage:
@@ -520,32 +549,30 @@ static VALUE LocalMemCache__check_consistency(VALUE obj) {
  *
  *  == Clearing memory pools
  *
- *  Removing memory pools can be done with LocalMemCache.drop(options). 
+ *  Removing memory pools can be done with LocalMemCache.drop(options).
  *
  *  == Environment
- *  
+ *
  *  If you use the :namespace parameter, the .lmc file for your namespace will
  *  reside in /var/tmp/localmemcache.  This can be overriden by setting the
  *  LMC_NAMESPACES_ROOT_PATH variable in the environment.
  *
  *  == Storing Ruby Objects
  *
- *  If you want to store Ruby objects instead of just strings, consider 
+ *  If you want to store Ruby objects instead of just strings, consider
  *  using LocalMemCache::SharedObjectStorage.
  *
  */
 void Init_rblocalmemcache() {
   lmc_init();
   LocalMemCache = rb_define_class("LocalMemCache", rb_cObject);
+
   rb_define_singleton_method(LocalMemCache, "_new", LocalMemCache__new2, 1);
-  rb_define_singleton_method(LocalMemCache, "drop", 
-      LocalMemCache__drop, 1);
-  rb_define_singleton_method(LocalMemCache, "check", 
-      LocalMemCache__check, 1);
-  rb_define_singleton_method(LocalMemCache, "disable_test_crash", 
-      LocalMemCache__disable_test_crash, 0);
-  rb_define_singleton_method(LocalMemCache, "enable_test_crash", 
-      LocalMemCache__enable_test_crash, 0);
+  rb_define_singleton_method(LocalMemCache, "drop", LocalMemCache__drop, 1);
+  rb_define_singleton_method(LocalMemCache, "check", LocalMemCache__check, 1);
+  rb_define_singleton_method(LocalMemCache, "disable_test_crash", LocalMemCache__disable_test_crash, 0);
+  rb_define_singleton_method(LocalMemCache, "enable_test_crash", LocalMemCache__enable_test_crash, 0);
+
   rb_define_method(LocalMemCache, "get", LocalMemCache__get, 1);
   rb_define_method(LocalMemCache, "[]", LocalMemCache__get, 1);
   rb_define_method(LocalMemCache, "delete", LocalMemCache__delete, 1);
@@ -554,13 +581,13 @@ void Init_rblocalmemcache() {
   rb_define_method(LocalMemCache, "[]=", LocalMemCache__set, 2);
   rb_define_method(LocalMemCache, "keys", LocalMemCache__keys, 0);
   rb_define_method(LocalMemCache, "each_pair", LocalMemCache__each_pair, 0);
-  rb_define_method(LocalMemCache, "random_pair", LocalMemCache__random_pair, 
-      0);
+  rb_define_method(LocalMemCache, "random_pair", LocalMemCache__random_pair, 0);
   rb_define_method(LocalMemCache, "close", LocalMemCache__close, 0);
   rb_define_method(LocalMemCache, "size", LocalMemCache__size, 0);
   rb_define_method(LocalMemCache, "shm_status", LocalMemCache__shm_status, 0);
-  rb_define_method(LocalMemCache, "check_consistency", 
-      LocalMemCache__check_consistency, 0);
+  rb_define_method(LocalMemCache, "check_consistency", LocalMemCache__check_consistency, 0);
+  rb_define_method(LocalMemCache, "_increment", LocalMemCache__increment, 2);
+  rb_define_method(LocalMemCache, "_decrement", LocalMemCache__decrement, 2);
 
   lmc_rb_sym_namespace = ID2SYM(rb_intern("namespace"));
   lmc_rb_sym_filename = ID2SYM(rb_intern("filename"));

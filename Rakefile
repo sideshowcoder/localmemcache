@@ -1,11 +1,10 @@
-task :default do
-end
-
 def manifest
   `git ls-files`.split("\n").select{|n| !%r!/site/!.match(n) }
 end
 
-def version() File.read("VERSION").chomp end
+def version
+  File.read("VERSION").chomp
+end
 
 desc "Generate a ChangeLog"
 task :changelog do
@@ -24,9 +23,16 @@ task :changelog do
   }
 end
 
-desc "Run the tests"
-task :sanity_test do
-  sh "./src/tests/sanity-test"
+namespace :test do
+  desc "Run the sanity tests"
+  task :sanity do
+    sh "./src/tests/sanity-test"
+  end
+
+  desc "Run the complete test suite"
+  task :all do
+    sh "cd ./src/tests && ./run-all-tests"
+  end
 end
 
 task :site_rdoc do
@@ -52,7 +58,6 @@ task :c_api_package do
   sh "tar czf #{tgz.inspect} #{manifest.map{|n| n.inspect }.join(" ")}"
 end
 
-#task :pushsite => [:rdoc] do
 task :pushsite do
   sh "chmod 755 site"
   sh "find site -type d | xargs chmod go+rx"
@@ -87,7 +92,7 @@ alternative to GDBM and Berkeley DB.
 
     EOF
 
-    s.files = manifest 
+    s.files = manifest
     s.extensions = ['configure', 'src/ruby-binding/extconf.rb']
     s.require_path = 'src/ruby-binding'
     s.has_rdoc = true
