@@ -10,7 +10,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     set -e
     set -x
     # apt-get stuff, all together to perform only one "update".
-    PACKAGES="curl git build-essential"
+    PACKAGES="curl git build-essential gdb"
     dpkg -s $PACKAGES >/dev/null || {
       sudo apt-get -y update
       sudo apt-get -y install $PACKAGES
@@ -32,6 +32,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     }
     command -v rake >/dev/null || {
       gem install rake
+      gem install pry
     }
   SCRIPT
 end

@@ -73,4 +73,21 @@ $ rake santity_test
 
 Runs the sanity test on the vagrant box now.
 
+Debug
+-----
+
+Running GDB for debugging C code
+
+```
+$ env DEBUG=1 rake sanity_test
+```
+
+Running Pry for debugging ruby in some rb file
+
+```
+require "pry"
+binding.pry
+```
+
+
 
